@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>SOCH</title>
+    <script src="/jquery-3.1.1.js"></script>
+    <link rel="stylesheet" href="/bootstrap-3.3.7-dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/bootstrap-3.3.7-dist/css/bootstrap-theme.min.css">
+    <script src="/bootstrap-3.3.7-dist/js/bootstrap.min.js"></script>
+    <link href="http://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/css/select2.min.css" rel="stylesheet"/>
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/js/select2.min.js"></script>
+</head>
+<body background="/images/back.jpg" style='font: "Helvetica Neue", Helvetica, Arial, sans-serif;'>
+<div class="container">
+    <div id="text-carousel" class="carousel slide" data-ride="carousel">
+        <!-- Wrapper for slides -->
+        <div class="row">
+            <div class="col-xs-offset-2 col-xs-8">
+                <div class="carousel-inner">
+                    <div class="item active">
+                        <div class="carousel-content" style="padding: 20px 0;">
+                            <p>"Those who improve with age embrace the power of personal growth and personal
+                                achievement and begin to replace youth with wisdom, innocence with understanding,
+                                and lack of purpose with self-actualization."</p>
+                        </div>
+                    </div>
+                    <div class="item">
+                        <div class="carousel-content" style="padding: 20px 0;">
+                            <p>"Education is not a tool for development - individual, community and the nation. It
+                                is the foundation for our future. It is empowerment to make choices and emboldens
+                                the youth to chase their dreams."</p>
+
+                        </div>
+                    </div>
+                    <div class="item">
+                        <div class="carousel-content" style="padding: 20px 0;">
+                            <p>"Independence is a heady draught, and if you drink it in your youth, it can have the
+                                same effect on the brain as young wine does. It does not matter that its taste is
+                                not always appealing. It is addictive and with each drink you want more."</p>
+
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+        <!-- Controls --> <a class="left carousel-control" href="#text-carousel" data-slide="prev">
+        <span class="glyphicon glyphicon-chevron-left"></span>
+    </a>
+        <a class="right carousel-control" href="#text-carousel" data-slide="next">
+            <span class="glyphicon glyphicon-chevron-right"></span>
+        </a>
+
+    </div>
+</div>
+<script>
+    function speak() {
+        document.cookie = "city=" + $city.val() + ";";
+        document.cookie = "problem=" + $problems.val() + ";";
+        $("#problems-div").load("/speak/problems.php");
+
+    }
+</script>
+
+<div class="container">
+    <div class="row">
+        <div class="col-xs-6">
+            <h2 class="text-center">Search</h2>
+            <div class="form-wrapper" style=" padding-top: 20px; width: 60%; margin: 0 auto; color: #ffffff;">
+                <form onsubmit="speak();return false;">
+                    <div class="form-group">
+                        <label for="country">Country : </label><select class="form-control" REQUIRED
+                                                                       id="country"></select>
+                    </div>
+                    <div class="form-group">
+                        <label for="state">State : </label><select class="form-control" required id="state"></select>
+                    </div>
+                    <div class="form-group">
+                        <label for="city">City : </label><select class="form-control" required id="city"></select>
+                    </div>
+                    <div class="form-group">
+                        <label for="problems">Problem : </label><select class="form-control" required
+                                                                        id="problems"></select>
+                    </div>
+                    <div class="form-group">
+                        <input type="submit" class="btn btn-success">
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div class="col-xs-6">
+            <div id="problems-div"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $country = $("#country");
+    $state = $("#state");
+    $city = $("#city");
+    $problems = $("#problems");
+    $country.select2({
+        placeholder: "Loading..."
+    });
+    $.getJSON("http://52.66.120.123/getCountries.php", function (data) {
+        $country.select2({
+            data: data,
+            placeholder: "Select Country"
+        });
+        $country.select2("val", " ");
+    });
+    $country.select2("val", " ");
+    $state.select2({
+        placeholder: "Select State"
+    });
+    $state.prop("disabled", true);
+    $city.select2({
+        placeholder: "Select City"
+    });
+    $city.prop("disabled", true);
+    $problems.select2({
+        data: [
+            "Abuse Against Women",
+            "Education",
+            "Child labour",
+            "Community Problems",
+            "Other"
+        ],
+        placeholder: "Select Problem"
+    });
+    $problems.select2("val", " ");
+    $problems.prop("disabled", true);
+
+    $country.on("select2:select", function (e) {
+        var selected_country = $(e.currentTarget).val();
+        $state.prop("disabled", true);
+        $city.prop("disabled", true);
+        $problems.prop("disabled", true);
+        $state.select2({
+            placeholder: "Loading..."
+        });
+        $state.select2('val', '');
+        $state.empty();
+        $.getJSON('http://52.66.120.123/getStates.php?country=' + selected_country, function (data) {
+            if (data.length > 0) {
+                $state.prop("disabled", false);
+                $state.select2({
+                    placeholder: "Select State",
+                    data: data
+                });
+                $state.select2('val', ' ');
+            } else {
+                $state.select2({
+                    placeholder: "No State Available"
+                });
+            }
+        });
+
+    });
+
+    $state.on("select2:select", function (e) {
+        var selected_state = $(e.currentTarget).val();
+        $city.prop("disabled", true);
+        $problems.prop("disabled", true);
+        $city.select2({
+            placeholder: "Loading..."
+        });
+        $city.select2('val', '');
+        $city.empty();
+        $.getJSON('http://52.66.120.123/getCities.php?state=' + selected_state, function (data) {
+            if (data.length > 0) {
+                $city.prop("disabled", false);
+                $city.select2({
+                    placeholder: "Select City",
+                    data: data
+                });
+                $city.select2('val', ' ');
+            } else {
+                $city.select2({
+                    placeholder: "No City Available"
+                });
+            }
+        });
+
+    });
+
+    $city.on("select2:select", function (e) {
+        $problems.prop("disabled", false);
+        $problems.select2('val', ' ');
+
+    });
+</script>
+
+
+</body>
+</html>
+
+<style>
+    .select2-selection__arrow {
+        margin-top: 5px;
+        margin-right: 5px;
+    }
+
+    .select2-selection.select2-selection--single {
+        padding: 5px;
+        height: 40px;
+    }
+
+    .select2-container {
+        width: 100% !important;
+    }
+
+    body {
+        color: #bababa;
+    }
+
+    .border {
+        border: solid;
+        border-radius: 30px;
+        margin: 6px;
+        background-color: orangered;
+
+    }
+
+    .border-select {
+        border: solid;
+        border-radius: 30px;
+        border-spacing: 50px;
+        background-color: orangered;
+    }
+
+    .margin {
+        margin-top: 70px;
+    }
+
+    li {
+        color: #3b2a2a !important;
+    }
+</style>
